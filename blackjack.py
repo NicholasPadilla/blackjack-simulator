@@ -16,26 +16,29 @@ isVerbose = False
 vprint = print if isVerbose else lambda *a, **k,: None
 
 @click.command()
-@click.option('-s', '--shoesize', default=6, help='An integer representing the amount of decks to use in the shoe. Default is 6 decks.')
+@click.option('-s', '--shoesize', default=8, help='An integer representing the amount of decks to use in the shoe. Default is 6 decks.')
 @click.option('-b', '--bankroll', default=10000, help='Determines the amount of dollars that each player begins the game with in their bankroll. Default is $1000.')
 @click.option('-h', '--hands', default=1000, help='Determines the number of hands to deal. Default is 1000.')
 @click.option('-t', '--tablemin', default=10, help='Determines the minimum table bet. Default is $10.')
-@click.option('-p', '--penetration', default=0.84, help='Dictates the deck penetration by the dealer. Default is 0.84 which means that the dealer will penetrate 84 percent of the shoe before re-shuffling')
+@click.option('-p', '--penetration', default=0.75, help='Dictates the deck penetration by the dealer. Default is 0.84 which means that the dealer will penetrate 84 percent of the shoe before re-shuffling')
 @click.option('-d', '--dealersettings', default="[17, True, True, True, True]", help='Assigns the dealer rules.')
 @click.option('-v', '--verbose', default=False, help='Prints all player, hand, and game information.')
 def main(shoesize, bankroll, hands, tablemin, penetration, dealersettings, verbose):
     print("Running blackjack simulation with variables:")
     print("Shoe size: ", shoesize, " | Bankroll: ", bankroll, " | Number of hands to simulate: ", hands, " | Minimum Table Bet: ", tablemin)
-    houseRules = HouseRules(standValue=dealersettings[0], DASoffered=dealersettings[1], RSAoffered=dealersettings[2], LSoffered=dealersettings[3], doubleOnSoftTotal=dealersettings[4])
-    game = BlackJackGame(shoesize, bankroll, hands, tablemin, penetration, houseRules)
-    global isVerbose
-    isVerbose = verbose
-    game.startGame()
-    gamedata = GameData(game)
-    gamedata.getDealerStatistics()
-    gamedata.getPlayerStatistics()
-    gamedata.plotBankrollTime()
-
+    avg_percent_inc = 0
+    for i in range(100):
+        houseRules = HouseRules(standValue=dealersettings[0], DASoffered=dealersettings[1], RSAoffered=dealersettings[2], LSoffered=dealersettings[3], doubleOnSoftTotal=dealersettings[4])
+        game = BlackJackGame(shoesize, bankroll, hands, tablemin, penetration, houseRules)
+        global isVerbose
+        isVerbose = verbose
+        game.startGame()
+        gamedata = GameData(game)
+        gamedata.getDealerStatistics()
+        gamedata.getPlayerStatistics()
+        x = gamedata.getPercentChange()
+        avg_percent_inc += x
+    print(avg_percent_inc/100)
 class GameData:
     def __init__(self, game):
         self.game: BlackJackGame = game
@@ -44,6 +47,12 @@ class GameData:
         self.bankrollData = {}
         self.getPlayerBankrollSnapshots()
     
+    def getPercentChange(self):
+        for player in self.players:
+            endBankroll = player.bankroll
+            initialBankroll = player.bankrollSnapshots[0]
+            percentChange = (endBankroll - initialBankroll) / initialBankroll * 100
+            return percentChange
     def getPlayerBankrollSnapshots(self):
         for player in self.players:
             self.bankrollData.update({player.name: player.bankrollSnapshots})
@@ -96,15 +105,7 @@ class BlackJackGame:
         vprint("Deck Penetration %: ", penetration, " | Minimum table bet: $", tableMin)
         self.dealer = Dealer(penetration, shoeSize, houseRules, CasinoStrategy(houseRules, isCounting=False, accuracy=1), isVerbose)
 
-        self.players = [Player("Counting with 1-6 Bet Spread", bankroll, BasicStrategy(houseRules, isCounting=True, accuracy=1), spread1_6(), isVerbose),
-                        Player("Counting with 1-50 Bet Spread", bankroll, BasicStrategy(houseRules, isCounting=True, accuracy=1), spread1_50(), isVerbose),
-                        Player('Counting with 1-6 Bet Spread, 50% Accurate Basic Strategy', bankroll, BasicStrategy(houseRules, isCounting=True, accuracy=0.50), spread1_6(), isVerbose),
-                        Player("Perfect Basic Strategy", bankroll, BasicStrategy(houseRules, isCounting=False, accuracy=1), spread1_6(), isVerbose),
-                        Player('99% Accurate Basic Strategy', bankroll, BasicStrategy(houseRules, isCounting=False, accuracy=0.99), spread1_50(), isVerbose),
-                        Player('95% Accurate Basic Strategy', bankroll, BasicStrategy(houseRules, isCounting=False, accuracy=0.95), spread1_50(), isVerbose),
-                        Player('75% Accurate Basic Strategy', bankroll, BasicStrategy(houseRules, isCounting=False, accuracy=0.75), spread1_50(), isVerbose),
-                        Player('Casino Rules', bankroll, CasinoStrategy(houseRules, isCounting=False, accuracy=1), spread1_6(), isVerbose),
-                        Player("Random", bankroll, RandomStrategy(houseRules, isCounting=False, accuracy=1), spread1_6(), isVerbose)]
+        self.players = [Player("Counting with 1-6 Bet Spread", bankroll, BasicStrategy(houseRules, isCounting=True, accuracy=1), spread1_6(), isVerbose)]
         vprint("There are ", len(self.players), " players in the game.")
     
     def clearAllCards(self, players: List[Player]):

@@ -71,3 +71,4 @@ class Dealer:
     
     def updateGains(self, amount):
         self.gains += amount
+    
