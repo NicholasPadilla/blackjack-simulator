@@ -57,5 +57,5 @@ def play_blackjack():
             print(f"Card: {card['value']} of {card['suit']}, Count: {count}, True Count: {tc}, Max True Count: {true}")
     print("Average Highest True Count for 500 different shoes ", sum_trues/500)    
 
-# Play a game of blackjack
+# Simulate card counting for 500 shoes
 play_blackjack()
