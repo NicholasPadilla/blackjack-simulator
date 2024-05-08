@@ -37,23 +37,23 @@ def count_cards(card, count):
 def play_blackjack():
     """Play a game of blackjack with card counting."""
     sum_trues = 0
-    for x in range(100):
-        shoe = create_deck(6)
+    for x in range(500):
+        shoe = create_deck(8)
         count = 0
         max = 0
         true = 0
-        while len(shoe) > 52:  # reshuffle when there are only 20 cards left
+        while len(shoe) > 104:  # determine when to reshuffle deck once specified number of cards remain
             card = shoe.pop(0)
             count = count_cards(card, count)
             if count > max:
                 max = count
                 true = max/(len(shoe)/52)
-            if len(shoe) == 52:
+            if len(shoe) == 104:
                 sum_trues += true
-            if len(shoe) < 52:
-                shoe = create_deck(6)
+            if len(shoe) < 104:
+                shoe = create_deck(8)
             print(f"Card: {card['value']} of {card['suit']}, Count: {count}, Max True Count: {true}")
-    print("Average Highest True Count for 100 different shoes ", sum_trues/100)    
+    print("Average Highest True Count for 500 different shoes ", sum_trues/500)    
 
 # Play a game of blackjack
 play_blackjack()
