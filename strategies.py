@@ -129,6 +129,7 @@ class BasicStrategy(StrategyInterface):
         9:  ["H", "H", "D", "D", "D", "D", "H", "H", "H", "H"],
         8:  ["H", "H", "H", "H", "H", "H", "H", "H", "H", "H"],
     }
+    
     # Handles pair splitting deviations in the event that double-after-split (DAS) is offered.
     def DASdeviations(self):
         self.pairSplitting.update({6: [False, True, True,  True,  True,  True,  False, False, False, False]})
