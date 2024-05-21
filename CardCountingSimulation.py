@@ -43,16 +43,16 @@ def play_blackjack():
         max = 0
         true = 0
         tc = 0
-        while len(shoe) > 52:  # determine when to reshuffle deck once specified number of cards remain
+        while len(shoe) > 26:  # determine when to reshuffle deck once specified number of cards remain
             card = shoe.pop(0)
             count = count_cards(card, count)
             tc = count/(len(shoe)/52)
             if count > max:
                 max = count
                 true = max/(len(shoe)/52)
-            if len(shoe) == 52:
+            if len(shoe) == 26:
                 sum_trues += true
-            if len(shoe) < 52:
+            if len(shoe) < 26:
                 shoe = create_deck(2)
             print(f"Card: {card['value']} of {card['suit']}, Count: {count}, True Count: {tc}, Max True Count: {true}")
     print("Average Highest True Count for 500 different shoes ", sum_trues/500)    
